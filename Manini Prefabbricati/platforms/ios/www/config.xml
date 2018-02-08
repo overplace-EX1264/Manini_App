@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.overplace.manini" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Manini Prefabbricati</name>
+    <description>
+        Prefrabbricati Manini
+    </description>
+    <author email="ut@overcapital.eu" href="http://www.overcapital.eu">
+        Overcapital S.p.a.
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="fullscreen" value="true" />
+    <preference name="SplashScreen" value="screen" />
+	<preference name="SplashScreenDelay" value="3500" />
+    <preference name="webviewbounce" value="true" />
+</widget>

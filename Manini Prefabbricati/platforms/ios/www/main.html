@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi" />
+        
+        <link rel="stylesheet" type="text/css" href="css/media_query.css" />
+        <link rel="stylesheet" type="text/css" href="css/main.css" />
+        <link rel="stylesheet" type="text/css" href="css/idangerous.swiper.css" />
+        
+        <title>Manini</title>
+    </head>
+    <body>
+    	
+    	<div id="box-header">
+    		<div id="box-logo">
+    			<div id="box-back"><img src="img/button/button_back.png"></div>
+    			<img src="img/logo/logo_1200.png" />
+    		</div>
+    		<div id="box-header-shadow"></div>
+    	</div>
+    	
+    	<div id="box-content">
+    		<div id="box-wrap">
+    		</div>
+    	</div>
+   	
+    	<div id="box-footer">
+    		<div id="box-footer-shadow"></div>
+    		<div id="box-footer-menu">
+    		<div class="menu_footer_bg">
+    			<div class="menu_footer_icon" id="home"><img src="img/button/footer_icon_home.png" /></div>
+    			<p>Home</p>
+    		</div>
+    		<div class="menu_footer_bg">
+    			<div class="menu_footer_icon" id="mappa"><img src="img/button/footer_icon_mappa.png" /></div>
+    			<p>Intorno a me</p>
+    		</div>
+    		<div class="menu_footer_bg">
+    			<div class="menu_footer_icon" id="cerca_citta"><img src="img/button/footer_icon_citta.png" /></div>
+    			<p>Cerca citt&agrave;</p>
+    		</div>
+    		<div class="menu_footer_bg">
+    			<div class="menu_footer_icon" id="contatti"><img src="img/button/footer_icon_contatti.png" /></div>
+    			<p>Contatti</p>
+    		</div>
+    		</div>
+    	</div>
+    	
+		<script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/jquery/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="js/fastclick.js"></script>
+        <script type="text/javascript" src="js/idangerous.swiper.min.js"></script>
+        <script type="text/javascript">
+      
+        var app = {
+        		
+        	    initialize: function() {
+        	        this.bindEvents();
+        	    },
+        	    bindEvents: function() {
+        	        document.addEventListener('deviceready', this.onDeviceReady, false);
+        	   },
+
+        	    onDeviceReady: function() {
+        	    	 document.addEventListener("backbutton", function(){
+        	    		 window.open('index.html', '_self', 'location=no');
+        	 	    }, true);
+        	    }
+        };
+        app.initialize();
+        
+        
+			var server_url = 'http://manini.overcapital.eu/?app=1&operation=lista_markers';
+			
+			var map;
+			var map_ready = false;
+			var map_height = 0;
+			var center;
+			var arr_marker = [];
+			var infowindow;			
+			var current_position = {};
+			var json_mappa = {};
+			var lista_citta = window.localStorage.getItem('lista_citta');
+			var search_citta = '';
+			var current_lat;
+			var current_lng;
+			var current_marker;
+			
+			var id_section = window.sessionStorage.getItem('section');
+			
+       		if(lista_citta == null) getListaCitta();
+			
+			init_nav();
+			$('div[id="'+id_section+'"]').parent().trigger("click");       
+						
+			function init_section(){
+								
+				$('div[id="box-back"]').css({'display':'none'});
+				
+				$('div[class="preloader"]').remove();
+				$('body').append('<div class="preloader"><p>Caricamento...</p></div>');
+				
+				if(id_section == 'mappa'){
+										
+					$('#box-wrap').empty();
+					$('#box-wrap').append('<div id="map-canvas"></div>');
+					
+					map_ready = false;
+					init_section_mappa();
+					
+				}else if(id_section == 'cerca_citta'){
+				
+					$('#box-wrap').empty();
+					$('#box-wrap').append('<div id="box-list"></div>');
+					init_section_cerca();
+					
+				}
+				
+				resize_container();
+				
+			}
+				
+			function init_section_mappa(){
+				if($("script[src*='https://maps.googleapis.com/maps/api/js?v=3.16&key=AIzaSyBYps5pxE4jmI5plggBISEQzpOfE1w6elM&sensor=true&callback=init_position']").length == 0){
+					var script = document.createElement('script');
+					script.type = 'text/javascript';
+					script.src = 'https://maps.googleapis.com/maps/api/js?v=3.16&key=AIzaSyBYps5pxE4jmI5plggBISEQzpOfE1w6elM&sensor=true&callback=init_position';
+					document.body.appendChild(script);
+				}else{
+					if(Object.keys(current_position).length == 0){
+						init_position();						
+					}else{
+						if(!map_ready){
+							init_map();
+							resize_container();
+						}
+						set_position_marker(current_position);
+					}
+				}
+			}
+			
+			function init_section_cerca(){
+				lista_citta = window.localStorage.getItem('lista_citta');
+	       		if(lista_citta == null){
+	       			getListaCitta();
+	       		} else {
+
+	           		try{
+	           			var lista = jQuery.parseJSON(lista_citta);
+	           			if(Object.keys(lista).length > 0){
+	           				init_list(lista);				
+	    				}
+	               		
+	           		} catch(e){
+	           			alert('Errore nel recupero della lista costruzioni');
+	           		}
+	           		
+	       		}
+			}
+			
+			function getListaCitta(){
+		    	$.ajax({
+			       	url : 'http://manini.overcapital.eu/?app=1&operation=lista_citta',
+			   		type : 'GET',
+			   		dataType : 'jsonp',
+			   		success : function(json){
+			   			if(json == undefined || json == null){
+			   				return;
+			   			}else{
+			   				var r = JSON.stringify(json);
+			   				window.localStorage.setItem('lista_citta', r);
+			   				var lista = jQuery.parseJSON(r);
+		           			if(Object.keys(lista).length > 0){
+		           				init_list(lista);				
+		    				} else {
+		    					alert('Errore nel recupero della lista costruzioni');
+		    				}
+			   			}
+			   		},
+			   		
+				});
+		    }
+			
+			function init_position(){
+				
+				init_map();
+				$('.preloader p').html("Localizzazione");
+				resize_container();
+				
+			}
+			
+			function onError(error){
+				golocationMaxmind();
+		    }
+
+			function onSuccess(position){
+				$('div[class="preloader"]').remove();
+				current_lat = position.coords.latitude;
+				current_lng = position.coords.longitude;
+				set_position_marker({'lat':position.coords.latitude, 'lng':position.coords.longitude});
+		    }
+		    
+		    function golocationMaxmind(){
+		    	$('div[class="preloader"]').remove();
+		    	set_position_marker({'lat':geoip_latitude(), 'lng':geoip_longitude()});
+		    }
+			
+			function init_map(){
+				map_ready = true;
+				
+				center = new google.maps.LatLng(42.9534456,12.7049408);
+				
+				var mapOptions = {
+						zoom: 10,
+						center: center,
+						zoomControl: false,
+						zoomControlOptions: {style:google.maps.ZoomControlStyle.SMALL},
+						scrollwheel: true,
+						mapTypeControl: false,
+						streetViewControl: false,
+						mapTypeId: google.maps.MapTypeId.ROADMAP,
+						disableDefaultUI: true
+				};
+				
+				map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+					
+				directUrlToExternalBrowser("http://maps.google.com/maps");
+				directUrlToExternalBrowser("http://www.google.com/intl");
+				
+				$('#map-canvas').height(map_height);
+				
+				if(!navigator.geolocation) navigator.geolocation = window.top.navigator.geolocation;
+									
+				if(navigator.geolocation){
+					navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge:600000, timeout: 10000, enableHighAccuracy: false});
+										
+				}else{
+					golocationMaxmind();
+				}
+			}
+			
+			function set_position_marker(position){
+				
+				if(current_marker instanceof google.maps.Marker){
+					current_marker.setMap(null);
+				}
+				
+				google.maps.event.trigger(map,'resize');
+								
+				current_position = position;
+				
+				center = new google.maps.LatLng(position.lat,position.lng);
+				map.setCenter(center);
+				map.setZoom(10);
+											
+				var image = {
+	   				url: 'img/pin.png',
+	   				size: null,//new google.maps.Size(32,42),
+	   				origin: null,//new google.maps.Point(0,0),
+	   				anchor: null,//new google.maps.Point(16,42)
+	   				scaledSize: new google.maps.Size(64, 84)
+		   		};
+				
+		    	var marker = new google.maps.Marker({
+				      position: center,
+				      map: map,
+				      icon: image,
+				      flat: true,
+				      draggable: false,
+				      optimized: false,
+				      title: 'La tua Posizione',
+				      zIndex: 9999
+				});
+		    	
+		    	current_marker = marker;
+		    	
+		    	google.maps.event.addDomListener(window, 'resize', function() {
+					map.setCenter(center);
+				});
+				
+				$.ajax({
+					url : server_url+'&lat='+position.lat+'&lng='+position.lng,
+			   		type : 'GET',
+			   		dataType : 'jsonp',
+			   		success : function(json){
+			   			if(json == undefined || json == null){
+			   				alert('Dati Mappa non disponibili!');
+			   				return;
+			   			}else{
+			   				
+				   			json_mappa = json;
+				   			init_marker();
+			   			}
+			   		}
+				});
+				
+			}
+				
+			function init_marker(){
+				
+				clearOverlays();
+				
+				infowindow = new google.maps.InfoWindow();
+				
+				var image = {
+	   				url: 'img/marker.png',
+	   				size: null,//new google.maps.Size(32,42),
+	   				origin: null,//new google.maps.Point(0,0),
+	   				anchor: null,//new google.maps.Point(16,42)
+	   				scaledSize: new google.maps.Size(32, 42)
+			   	};
+								
+				for(var i in json_mappa){
+											
+					var marker = new google.maps.Marker({
+						position: new google.maps.LatLng(json_mappa[i]['lt'],json_mappa[i]['ln']),
+						map: map,
+						icon: image,
+						flat: true,
+						draggable: false,
+						optimized: false,
+						id : json_mappa[i]['id'],
+						title : json_mappa[i]['nome'],
+						zIndex: eval(100+json_mappa[i]['id']),
+						animation: google.maps.Animation.DROP
+					});
+					arr_marker.push(marker);
+						
+					(function(marker, i){
+							
+						google.maps.event.addListener(marker, 'click', function() {
+							
+							if(map.getZoom() < 13) map.setZoom(13);
+
+							var position = marker.getPosition();
+
+							map.panTo(position);
+							center = position;
+							
+							infowindow.close();
+							
+							infowindow.setContent('<div class="infowindow"><h3>'+json_mappa[i]['nome']+'</h3><p>'+json_mappa[i]['indirizzo']+'</p><div id="dettaglio_'+i+'" class="btn_scheda"><p>Vai alla scheda</p></div><div id="indicazioni_'+i+'" class="btn_indicazioni"><p>Guidami</p></div></div>');
+		                    infowindow.open(map, marker);
+		                    
+		                    var font_x = $(window).width();
+							$('#map-canvas .infowindow h3').css('font-size', (font_x*0.05)+'px');
+							$('#map-canvas .infowindow p').css('font-size', (font_x*0.04)+'px');
+						
+						});
+					})(marker, i);
+						
+				}
+					
+			}
+			
+			function clearOverlays(){
+				if(arr_marker){
+					for(i in arr_marker){
+						arr_marker[i].setMap(null);
+					}
+				}
+			}
+			
+			function directUrlToExternalBrowser(urlPattern){
+			   $(function() {
+		            FastClick.attach(document.body);
+		        });
+			   
+			    var pattern = "a[href^='"+urlPattern+"']";
+			    $('#map-canvas').on('click', pattern, function(e){
+			        e.preventDefault();
+			    });
+			}
+			
+			function init_list(lista_citta){
+				var lista = {};
+        		for(var id in lista_citta){
+        			var citta = lista_citta[id]['citta'];
+        			if(!(citta in lista)){
+        				lista[citta] = new Array();
+        				lista[citta].push(lista_citta[id]);
+        			} else {
+        				lista[citta].push(lista_citta[id]);
+        			}
+        		}
+        		
+        		$('#box-list').empty();
+        		$('#box-list').before('<div id="box-ricerca"><form id="ricerca_citta">'+
+        				'<input type="text" name="cerca_citta" value="" placeholder="Cerca città..." />'+
+        				'<input type="submit" id="button_cerca_citta" value="Cerca"/></form>');
+        		
+        		$('input[name="cerca_citta"]').onfocus = function () {
+        	        window.scrollTo(0, 0);
+        	        document.body.scrollTop = 0;
+        	    }
+
+        		var list = '<ul>';
+        		
+        		var keys = [];
+        		var keys_sort = Object.keys(lista).sort();
+        		        		
+        		for(var k=0; k<keys_sort.length; k++){
+        			var key = keys_sort[k];
+        			list+='<li class="title_citta" id="lista_'+key+'"><div class="elem_list"><div class="content_list"><h3>'+key+'</h3></div></div>';
+        			keys.push(key);
+        			if(lista[key].length > 0){
+        				list+= '<ul>';
+	        			for(var i = 0; i < lista[key].length; ++i){
+	        				var odd = (i%2 == 0) ? '' : ' class="odd" ';
+	            			list+='<li'+odd+' id="dettaglio_lista_'+lista[key][i]['id']+'"><div class="elem_list"><div class="content_list"><p>'+lista[key][i]['nome']+'</p>'
+	            			+'<span>'+lista[key][i]['indirizzo']+'</span><div class="button_list"><img src="img/button/button_arrow.png" /></div></div></div></li>';
+	        			}
+	        			list+= '</ul></li>';
+        			} else {
+        				list+='<div class="elem_list"><div class="content_list"><p>Nessun fabbricato</p></div></div></li>'
+        			}
+        		}
+        		        		
+        		list+='</ul>';
+        		$('#box-list').append(list);
+        		$('div[class="preloader"]').remove();
+        		$('form[id="ricerca_citta"]').submit(function(event){
+        			event.preventDefault();
+        			$('body').append('<div class="preloader"><p>Caricamento...</p></div>');
+        			$('.preloader p').css('font-size', ($(window).width()*0.05)+'px');
+        			
+        			$('div[class="preloader"]').show(0, function(){
+        				 setTimeout(function(){
+							var str = $('input[name="cerca_citta"]').val();
+         					search_citta = str;
+         					$('div[id="box-list"]').find('li').show();
+             			    for (var i in keys) {
+             			        if(!keys[i].match(new RegExp(str, "i"))){
+             			        	$('li[id="lista_'+keys[i]+'"]').hide();
+             			        }
+             			    }
+             			    
+             			    $('li[id="nores"]').remove();
+             			    var nr = $('div[id="box-list"]').find('li:visible').length;
+             			    if(nr == 0){
+             			    	$('#box-list ul').append('<li id="nores"><div class="elem_list"><div class="content_list"><p>Nessun risultato</p></div></div></li>');
+             			    } else {
+             			    	$('li[id="nores"]').remove();
+             			    }
+         			    }, 1000);
+    					
+        			    setTimeout(function(){
+    	    			    $('div[class="preloader"]').remove();
+        			    }, 1000);
+        			});
+        			
+    			});
+        		
+        		$('input[name="cerca_citta"]').val(search_citta);
+        		$( "#ricerca_citta" ).submit();
+        		
+        	}
+			
+			$('div[id="box-wrap"]').on('click','div[class="button_list"]',function(){
+				var id = $(this).closest('li').attr('id').replace('dettaglio_lista_','');
+				
+				$('#box-wrap').empty();
+				$('#box-wrap').append('<div id="box-scheda"></div>');
+				
+				var lista = jQuery.parseJSON(lista_citta);
+				init_scheda(lista[id], id);
+				
+			});
+			
+			
+			$('div[id="box-wrap"]').on('click','div[id^="dettaglio_"]',function(){
+				var id = $(this).attr('id').replace('dettaglio_','');
+				
+				$('#box-wrap').empty();
+				$('#box-wrap').append('<div id="box-scheda"></div>');
+				init_scheda(json_mappa[id], id);
+				
+			});
+			
+			$('div[id="box-wrap"]').on('click','div[id^="indicazioni_"]',function(){
+				var id = $(this).attr('id').replace('indicazioni_','');
+				
+				var lista = jQuery.parseJSON(lista_citta);
+				var url = "http://maps.google.com/maps?daddr="+lista[id]['lt']+","+lista[id]['ln'];
+				window.open(url, "_system");
+			});
+			
+			
+			$('div[id="box-logo"]').on('click','div[id="box-back"]' ,function(){
+				$(this).css('display','none');	
+				init_section();
+			});
+			
+			function init_scheda(content, id){
+				var titolo = '<div class="scheda_title"><h3>'+content['nome']+'</h3><p>'+content['indirizzo']+'</p><div id="indicazioni_'+id+'" class="btn_indicazioni"><p>Guidami</p></div></div>';
+				var gallery = '';
+				if(content['foto'] != '-'){
+					var images = $.parseJSON(content['foto']);
+					var gallery = '<div class="device">'+
+									    '<div class="swiper-container">'+
+									      '<div class="swiper-wrapper">';
+					for(var img in images){	
+						gallery += '<div class="swiper-slide"><div class="title"><img src="http://manini.overcapital.eu/wp-content/uploads/'+images[img]+'"/></div></div>'
+					}
+					
+					gallery += '</div>'+
+					    	'</div>'+
+							'</div>'+
+						'<div class="pagination"></div>';
+				}						
+				
+				var descrizione = '<div class="scheda_description"><h3>SCHEDA TECNICA</h3>'+
+				'<p>NOME: <strong>'+content['nome']+'</strong></p>'+
+				'<p>PROGETTISTA: <strong>'+content['progettista']+'</strong></p>'+
+				'<p>ANNO REALIZZAZIONE: <strong>'+content['anno_realizzazione']+'</strong></p>'+
+				'<p>STRUTTURA: <strong>'+content['struttura']+'</strong></p>'+
+				'<p>SUPERFICIE: <strong>'+content['superficie']+'</strong></p>'+
+				'</div>';
+				
+				$('#box-scheda').append(titolo+gallery+descrizione);
+				
+				resize_font_scheda();
+				
+				$('#box-back').css('display','block');
+				if(gallery.length > 1){
+					if(images.length > 1){
+						var mySwiper = new Swiper('.swiper-container',{
+							mode: 'horizontal',
+						    slidesPerView: 1,
+						    loop: true,
+						    autoplay : 5000,
+						    autoplayDisableOnInteraction: false,
+						    calculateHeight: true,
+						    centeredSlides: true,
+						    resizeReInit: true,
+						    autoResize: true,
+						    pagination: '.pagination',
+						    paginationClickable: true,
+						    onImagesReady: function(){
+						    	mySwiper.resizeFix();
+						    }
+						});
+					} else if(images.length == 1){
+						var mySwiper = new Swiper('.swiper-container',{
+							mode: 'horizontal',
+						    slidesPerView: 1,
+						    loop: false,
+						    autoplayDisableOnInteraction: false,
+						    calculateHeight: true,
+						    centeredSlides: true,
+						    resizeReInit: true,
+						    autoResize: true,
+						    paginationClickable: true,
+						    onImagesReady: function(){
+						    	mySwiper.resizeFix();
+						    }
+						});
+						$('.pagination').remove();
+					}
+				}
+			}
+			
+			
+			function resize_container(){
+								
+				var viewport_height = $(window).height();
+				var header_h = $('#box-header').css('height').replace('px','');
+				var footer_h = $('#box-footer').css('height').replace('px','');
+								
+				map_height = viewport_height-(header_h-22)-(footer_h-20);
+
+				$('#box-wrap').css('padding',(header_h-22)+'px 0px '+(footer_h-24)+'px 0px');
+				$('#map-canvas').height(map_height);
+								
+				var font_x = $(window).width();
+				
+				if($('#map-canvas').length != 0){
+					resize_font_mappa();	
+				}
+				
+				if($('#box-list').length != 0){
+					//var ricerca_h = $('#box-ricerca').outerHeight();
+					//$('#box-list').css('margin-top',ricerca_h+'px');
+					resize_font_cerca();	
+				}
+				
+				if($('#box-scheda').length != 0){
+					resize_font_scheda();	
+				}				
+				
+				$('#box-footer-menu').find('p').css('font-size', (font_x*0.04)+'px');
+				$('.preloader p').css('font-size', (font_x*0.05)+'px');
+								
+			}
+						
+			function resize_font_mappa(){
+				
+				if(infowindow !== null && typeof infowindow !== "undefined"){
+					infowindow.close();
+				}
+				
+			}
+			
+			function resize_font_cerca(){
+				
+				var font_x = $(window).width();
+								
+				$('.content_list h3').css('font-size', (font_x*0.08)+'px');
+				$('.content_list p').css('font-size', (font_x*0.06)+'px');
+				$('.content_list p').css('line-height', (font_x*0.07)+'px');
+				$('.content_list span').css('font-size', (font_x*0.05)+'px');
+				$('.content_list span').css('line-height', (font_x*0.06)+'px');
+			}
+			
+			function resize_font_scheda(){
+				
+				var font_x = $(window).width();
+				
+				$('.scheda_title h3').css('font-size', (font_x*0.08)+'px');
+				$('.scheda_title p').css('font-size', (font_x*0.05)+'px');
+				$('.scheda_description h3').css('font-size', (font_x*0.07)+'px');
+				$('.scheda_description p').css('font-size', (font_x*0.05)+'px');
+			}
+			
+			function init_nav(){
+				$(function() {
+		            FastClick.attach(document.body);
+		        });
+				$('#box-back').css('display','none');
+				
+				$('div[id="home"]').parent().on('click', function(){
+					window.open('index.html', '_self', 'location=no')
+				});
+				$('div[id="mappa"]').parent().on('click', function(){
+					
+					$(this).addClass('active');
+					$(this).find('img').attr('src','img/button/footer_icon_mappa_active.png')
+					
+					$('#cerca_citta').parent().removeClass('active');
+					$('#cerca_citta img').attr('src','img/button/footer_icon_citta.png')
+					
+					id_section = 'mappa';
+					init_section();
+				});
+				$('div[id="cerca_citta"]').parent().on('click', function(){
+					
+					$(this).addClass('active');
+					$(this).find('img').attr('src','img/button/footer_icon_citta_active.png')
+					
+					$('#mappa').parent().removeClass('active');
+					$('#mappa img').attr('src','img/button/footer_icon_mappa.png')
+
+					id_section = 'cerca_citta';
+					init_section();
+				});
+				$('div[id="contatti"]').parent().on('click', function(){
+					window.location.href = 'mailto:com@manini.it';
+				});
+			}
+			
+			$(window).resize(function() {
+				resize_container();
+			});
+			
+			
+    </script>
+    </body>
+</html>

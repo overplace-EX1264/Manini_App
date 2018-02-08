@@ -1,0 +1,49 @@
+/* Custom, iPhone Retina */ 
+@media only screen and (max-width : 479px) {
+		
+	#map-canvas .infowindow { width:180px !important; padding:5px !important; }
+		
+	#box-ricerca { padding:8% 5% !important; }
+	#box-ricerca input[type='text'] { width:65% !important; }
+	#button_cerca_citta { width:25% !important; }
+	
+}
+
+/* Extra Small Devices, Phones */ 
+@media only screen and (min-width : 480px) {
+	
+	#map-canvas .infowindow { padding:10px !important; }
+	
+	#box-ricerca { padding:6% 5% !important; }
+	#box-ricerca input[type='text'] { width:70% !important; font-size: 20px !important;}
+	#button_cerca_citta { width:20% !important; font-size: 20px !important;}
+
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 650px) {
+	
+	#map-canvas .infowindow { width:400px !important; padding:15px !important; }
+	
+	#box-ricerca { padding:8% 5% !important; }
+	#box-ricerca input[type='text'] { width:70% !important; font-size: 24px !important;}
+	#button_cerca_citta { width:20% !important;font-size: 24px !important; }
+	
+}
+
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1),
+only screen and (        min-device-pixel-ratio: 2),
+only screen and (                min-resolution: 192dpi),
+only screen and (                min-resolution: 2dppx)
+only screen and (min-width : 800px){ 
+  	
+	#map-canvas .infowindow { padding:10px !important; }
+	
+	#box-ricerca { padding:6% 5% !important; }
+	#box-ricerca input[type='text'] { width:70% !important; }
+	#button_cerca_citta { width:20% !important; }
+
+}
