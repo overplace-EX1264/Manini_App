@@ -430,6 +430,7 @@
         			$('div[class="preloader"]').show(0, function(){
         				 setTimeout(function(){
 							var str = $('input[name="cerca_citta"]').val();
+                            str = $.trim(str);
          					search_citta = str;
          					$('div[id="box-list"]').find('li').show();
              			    for (var i in keys) {
