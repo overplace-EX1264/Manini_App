@@ -299,6 +299,7 @@
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 2Y5BTH28UB;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -445,6 +446,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 2Y5BTH28UB;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -454,6 +456,12 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				GENERATE_PROFILING_CODE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(TARGET_BUILD_DIR)/usr/local/lib/include\"",
+					"\"$(OBJROOT)/UninstalledProducts/include\"",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
+					"$(OBJROOT)/UninstalledProducts/$(PLATFORM_NAME)/include",
+				);
 				INFOPLIST_FILE = "Manini Prefabbricati/Manini Prefabbricati-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -472,6 +480,8 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "Manini Prefabbricati";
+				PROVISIONING_PROFILE = "1a46b7fe-99d1-4ad6-bb35-b24f8fd377cc";
+				PROVISIONING_PROFILE_SPECIFIER = Manini_Pro_Dev_12_02_2018;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -484,6 +494,8 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = YES;
 				DEVELOPMENT_TEAM = 2Y5BTH28UB;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -491,6 +503,12 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				GENERATE_PROFILING_CODE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(TARGET_BUILD_DIR)/usr/local/lib/include\"",
+					"\"$(OBJROOT)/UninstalledProducts/include\"",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
+					"$(OBJROOT)/UninstalledProducts/$(PLATFORM_NAME)/include",
+				);
 				INFOPLIST_FILE = "Manini Prefabbricati/Manini Prefabbricati-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -509,6 +527,8 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "Manini Prefabbricati";
+				PROVISIONING_PROFILE = "161f8a20-7cb5-4087-a213-0a310a94db20";
+				PROVISIONING_PROFILE_SPECIFIER = Manini_Pro_Dis_12_02_2018;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
