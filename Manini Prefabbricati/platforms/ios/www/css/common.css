@@ -43,6 +43,7 @@ body {
 .box_button_menu_home img { display:block; width:100%; min-width:140px; max-width:100%; margin:0px auto; padding:0px; }
 .box_button_menu_home .box_menu_text { position:absolute; top:6%; left:28%; width:65%; }
 .box_button_menu_home .box_menu_text h1 { color:#004C8B; text-align:left; font-weight:normal; }
+.box_button_menu_home .box_menu_text h2 { color:#004C8B; text-align:left; font-weight:normal; }
 .box_button_menu_home .box_menu_icon { position:absolute; width:15%; top:23.5%; left:9%; }
 .box_button_menu_home .box_menu_icon img { display:block; width:100%; min-width:100%; max-width:100%; margin:0px auto; padding:0px; }
 

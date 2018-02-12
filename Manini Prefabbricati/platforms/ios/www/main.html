@@ -40,7 +40,7 @@
     		</div>
     		<div class="menu_footer_bg">
     			<div class="menu_footer_icon" id="cerca_citta"><img src="img/button/footer_icon_citta.png" /></div>
-    			<p>Cerca citt&agrave;</p>
+    			<p>Cerca Provincia</p>
     		</div>
     		<div class="menu_footer_bg">
     			<div class="menu_footer_icon" id="contatti"><img src="img/button/footer_icon_contatti.png" /></div>
@@ -378,7 +378,7 @@
 			function init_list(lista_citta){
 				var lista = {};
         		for(var id in lista_citta){
-        			var citta = lista_citta[id]['citta'];
+        			var citta = lista_citta[id]['province'];
         			if(!(citta in lista)){
         				lista[citta] = new Array();
         				lista[citta].push(lista_citta[id]);
@@ -389,7 +389,7 @@
         		
         		$('#box-list').empty();
         		$('#box-list').before('<div id="box-ricerca"><form id="ricerca_citta">'+
-        				'<input type="text" name="cerca_citta" value="" placeholder="Cerca città..." />'+
+        				'<input type="text" name="cerca_citta" value="" placeholder="Cerca Province..." />'+
         				'<input type="submit" id="button_cerca_citta" value="Cerca"/></form>');
         		
         		$('input[name="cerca_citta"]').onfocus = function () {

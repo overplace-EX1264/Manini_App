@@ -53,7 +53,7 @@ var app = {
 
     onDeviceReady: function() {
 
-        StatusBar.overlaysWebView(false);
+        //StatusBar.overlaysWebView(false);
 
 		document.addEventListener('offline', app.onOfflineStatus, false);
 	    document.addEventListener('online', app.onOnlineStatus, false);
@@ -169,6 +169,7 @@ var app = {
 	   			if(json == undefined || json == null){
 	   				return;
 	   			}else{
+               console.log("Console => " + JSON.stringify(json))
 	   				window.localStorage.setItem('lista_citta', JSON.stringify(json));
 	   			}
 	   		}
