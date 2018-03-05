@@ -92,6 +92,7 @@ var app = {
         var home_azienda = $('div[id="tap_home_azienda"]');
         var home_contatti = $('div[id="tap_home_contatti"]');
         var home_cerca_citta = $('div[id="tap_home_cerca_citta"]');
+        var home_connect = $('div[id="tap_home_connect"]');
         
         var button_back = $('div[id="tap_home_indietro"]');
         var button_back = $('div[id="tap_home_indietro"]');
@@ -154,6 +155,9 @@ var app = {
         	window.location.href = 'mailto:com@manini.it';
         });
         
+        home_connect.on('click', function(){
+            window.open('https://connect.manini.it/', '_system', 'location=yes')
+        });
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
