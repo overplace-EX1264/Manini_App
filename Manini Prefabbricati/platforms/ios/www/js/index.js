@@ -78,7 +78,7 @@ var app = {
         	$('#box-wrap-index').css('margin','0px auto -'+footer_h+'px auto');
         	$('#push').height(footer_h);
         	
-        	$('.box_button_menu_home').find('h1').css('font-size', ($(window).width()*0.07)+'px');
+        	$('.box_button_menu_home').find('h1').css('font-size', ($(window).width()*0.06)+'px');
         	$('.box_button_menu_indietro').find('h3').css('font-size', ($(window).width()*0.04)+'px');
         }
         
